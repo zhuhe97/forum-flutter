@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:forum_app/components/auth_check.dart';
+import 'package:forum_app/state/user_model.dart';
+import 'package:forum_app/routes/create_post.dart';
+import 'package:forum_app/routes/user.dart';
 import 'package:forum_app/state/post.dart';
 import 'components/post_table.dart';
 import "package:provider/provider.dart";
@@ -41,31 +45,47 @@ class _MyHomePageState extends State<MyHomePage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          Center(child: PostsTable()),
-          Center(child: Text('Tab 2 Content')),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Me',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        onTap: _onItemTapped,
+    return ChangeNotifierProvider(
+      create: (_) => UserModel(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            Center(child: PostsTable()),
+            AuthCheck(child: UserProfilePage()),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: 'Me',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Theme.of(context).colorScheme.primary,
+          onTap: _onItemTapped,
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            final userModel = Provider.of<UserModel>(context, listen: false);
+            if (userModel.isLoggedIn) {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => CreatePostPage()));
+            } else {
+              Navigator.pushNamed(context, '/login');
+            }
+          },
+          child: Icon(Icons.edit),
+          tooltip: 'Create Post',
+        ),
       ),
     );
   }

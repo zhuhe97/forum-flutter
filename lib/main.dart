@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:forum_app/routes/login.dart';
+import 'package:forum_app/routes/user.dart';
+import 'package:forum_app/state/user_model.dart';
 import 'home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:forum_app/state/post.dart';
@@ -33,7 +36,15 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreenAccent),
           useMaterial3: true,
         ),
-        home: const MyHomePage(title: 'Jenna\'s Forum'),
+        home: ChangeNotifierProvider(
+            create: (_) => UserModel(),
+            child: MyHomePage(title: 'Jenna\'s Forum')),
+        routes: {
+          '/login': (context) => ChangeNotifierProvider(
+              create: (_) => UserModel(), child: LoginPage()),
+          '/user': (context) => ChangeNotifierProvider(
+              create: (_) => UserModel(), child: UserProfilePage()),
+        },
       ),
     );
   }
