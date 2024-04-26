@@ -49,6 +49,45 @@ class _PostPageState extends State<PostPage> {
     );
   }
 
+  void _showAddCommentDialog() {
+    final TextEditingController commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Comment'),
+          content: TextField(
+            controller: commentController,
+            decoration: InputDecoration(
+              labelText: 'Your Comment',
+            ),
+            maxLines: 3,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final commentContent = commentController.text;
+                final postsModel =
+                    Provider.of<PostsModel>(context, listen: false);
+
+                if (commentContent.isNotEmpty) {
+                  postsModel.createComment(widget.postId, commentContent);
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +96,7 @@ class _PostPageState extends State<PostPage> {
         actions: [
           IconButton(
             icon: Icon(Icons.comment),
-            onPressed: () => print('add comment'),
+            onPressed: _showAddCommentDialog,
           ),
         ],
       ),
