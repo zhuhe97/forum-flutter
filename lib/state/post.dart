@@ -155,4 +155,28 @@ class PostsModel extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  Future<void> replyComment(
+      String postId, String parentCommentId, String content) async {
+    setLoading(true);
+    try {
+      String? token = await storage.read(key: 'auth_token');
+      if (token != null) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+      final response = await dio
+          .post('http://10.0.2.2:8888/api/v1/posts/$postId/comments', data: {
+        'content': content,
+        'parentCommentId': parentCommentId,
+      });
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setLoading(false);
+        fetchComments(postId, 2);
+      }
+    } on DioError catch (e) {
+      print('Dio error: ${e.response?.statusCode} ${e.message}');
+    } finally {
+      setLoading(false);
+    }
+  }
 }
