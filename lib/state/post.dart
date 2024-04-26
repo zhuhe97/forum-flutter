@@ -110,4 +110,27 @@ class PostsModel extends ChangeNotifier {
       setLoading(false);
     }
   }
+
+  Future<void> toggleLike(String commentId) async {
+    try {
+      String? token = await storage.read(key: 'auth_token');
+      if (token != null) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+      final response =
+          await dio.post('http://10.0.2.2:8888/api/v1/toggleLike/$commentId');
+      if (response.statusCode == 200) {
+        print('${response.data}');
+        final index = comments.indexWhere((comment) => comment.id == commentId);
+        if (index != -1) {
+          final comment = comments[index];
+          comment.isLikedByCurrentUser = !comment.isLikedByCurrentUser;
+          comment.likeCount += comment.isLikedByCurrentUser ? 1 : -1;
+          notifyListeners();
+        }
+      }
+    } on DioError catch (e) {
+      print('Dio error: ${e.response?.statusCode} ${e.message}');
+    }
+  }
 }

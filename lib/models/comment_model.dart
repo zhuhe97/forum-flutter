@@ -15,8 +15,8 @@ class Comment {
   final User author;
   final String createdAt;
   final String updatedAt;
-  final int likeCount;
-  final bool isLikedByCurrentUser;
+  int likeCount;
+  bool isLikedByCurrentUser;
   final ParentComment parentComment;
   final ParentCommentStatus parentCommentStatus;
   Comment({

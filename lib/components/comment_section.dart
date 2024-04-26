@@ -1,6 +1,9 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import '../state/post.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class CommentsSection extends StatelessWidget {
   final String postId;
@@ -18,28 +21,82 @@ class CommentsSection extends StatelessWidget {
           itemCount: provider.comments.length,
           itemBuilder: (context, index) {
             final comment = provider.comments[index];
+            DateTime? commentTime;
+            commentTime = DateTime.tryParse(comment.createdAt);
+
+            String formattedTime = "Unknown";
+            if (commentTime != null) {
+              formattedTime = DateFormat.yMMMMd('en_US').format(commentTime);
+            }
+
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 6.0, horizontal: 10.0),
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      CircleAvatar(
-                        backgroundImage: comment.author.avatarUrl != null
-                            ? NetworkImage(comment.author.avatarUrl!)
-                            : AssetImage('lib/assets/defaultAvatar.png')
-                                as ImageProvider,
-                        onBackgroundImageError: (_, __) => Icon(Icons.person),
-                        radius: 16,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(children: [
+                        CircleAvatar(
+                          backgroundImage: comment.author.avatarUrl != null
+                              ? NetworkImage(comment.author.avatarUrl!)
+                              : AssetImage('lib/assets/defaultAvatar.png')
+                                  as ImageProvider,
+                          onBackgroundImageError: (_, __) => Icon(Icons.person),
+                          radius: 12,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          comment.author.username!,
+                          style: TextStyle(color: Colors.black, fontSize: 14),
+                        ),
+                      ]),
+                      Row(
+                        children: [
+                          Text(
+                            formattedTime,
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                        ],
                       ),
-                      Text(comment.author.username!,
-                          style: TextStyle(color: Colors.black))
-                    ]),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(comment.content),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4.0, horizontal: 8.0),
+                    child: Text(comment.content),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          icon: Icon(
+                            comment.isLikedByCurrentUser
+                                ? Icons.thumb_up
+                                : Icons.thumb_up_outlined,
+                            size: 16,
+                          ),
+                          style: const ButtonStyle(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () {
+                            provider.toggleLike(comment.id);
+                          },
+                        ),
+                        Text(
+                          comment.likeCount.toString(),
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                      ],
                     ),
-                  ]),
+                  ),
+                ],
+              ),
             );
           },
         );
