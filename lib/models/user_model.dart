@@ -12,6 +12,16 @@ class User {
     this.username,
     this.avatarUrl,
   });
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    final name = json['username'] ?? json['name'];
+    final avatarUrl = json['avatarUrl'];
+
+    return User(
+      id: json['_id'],
+      username: name,
+      avatarUrl: avatarUrl,
+    );
+  }
   Map<String, dynamic> toJson() => _$UserToJson(this);
 }

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:forum_app/models/comment_model.dart';
 import '../state/post.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -63,6 +64,34 @@ class CommentsSection extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (comment.parentCommentStatus ==
+                      ParentCommentStatus.Existing)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      padding: EdgeInsets.all(8),
+                      width: 400,
+                      child: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text:
+                                  '${comment.parentComment.author!.username}  ',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: comment.parentComment.content!,
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
                         vertical: 4.0, horizontal: 8.0),
