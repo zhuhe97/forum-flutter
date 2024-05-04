@@ -1,32 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:forum_app/models/comment_model.dart';
-import 'package:forum_app/models/post_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class PostsModel extends ChangeNotifier {
-  List<Post> _posts = [];
-  bool _loading = false;
-  int _currentPage = 1;
-  int _totalPages = 0;
-  Post? currentPost;
+class CommentsModel extends ChangeNotifier {
   List<Comment> comments = [];
-
-  List<Post> get posts => _posts;
-  bool get loading => _loading;
-  int get currentPage => _currentPage;
-  int get totalPages => _totalPages;
+  bool _loading = false;
+  int _loadingTopPage = 0;
+  int _loadingEndPage = 0;
+  int _totalPages = 0;
+  int _currentPage = 0;
 
   final dio = Dio();
   final storage = FlutterSecureStorage();
+
+  int get totalPages => _totalPages;
+  int get loadingTopPage => _loadingTopPage;
+  int get loadingEndPage => _loadingEndPage;
+  int get currentPage => _currentPage;
 
   void setLoading(bool loading) {
     _loading = loading;
     notifyListeners();
   }
 
-  void setCurrentPage(int page) {
-    _currentPage = page;
+  void setloadingEndPage(int page) {
+    _loadingEndPage = page;
+    notifyListeners();
+  }
+
+  void setloadingTopPage(int page) {
+    _loadingTopPage = page;
+    notifyListeners();
+  }
+
+  void setCurrentPage(int maxVisiblePage) {
+    _currentPage = maxVisiblePage;
     notifyListeners();
   }
 
@@ -35,75 +44,47 @@ class PostsModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchPosts() async {
+  void resetComments() {
+    comments = [];
+    _loadingTopPage = 0;
+    _loadingEndPage = 0;
+    _totalPages = 0;
+    _currentPage = 0;
+  }
+
+  Future<void> fetchComments(
+    String postId,
+    int page,
+  ) async {
     if (_loading) return;
     setLoading(true);
 
     try {
-      final response = await dio
-          .get('http://10.0.2.2:8888/api/v1/posts?page=$_currentPage&limit=10');
-      final jsonData = response.data['data']['data'];
-      List<Post> newPosts =
-          List<Post>.from(jsonData.map((json) => Post.fromJson(json)));
-      if (newPosts.isNotEmpty) {
-        _posts.addAll(newPosts);
-        setCurrentPage(_currentPage + 1);
-        _totalPages = response.data['data']['totalPages'];
-        notifyListeners();
-      }
-    } on DioError catch (e) {
-      print('Dio error: ${e.response?.statusCode} ${e.message}');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  Future<void> fetchPostDetail(String postId) async {
-    setLoading(true);
-    try {
-      final response =
-          await dio.get('http://10.0.2.2:8888/api/v1/posts/$postId');
-      if (response.statusCode == 200) {
-        currentPost = Post.fromJson(response.data);
-        notifyListeners();
-      }
-    } on DioError catch (e) {
-      print('Dio error: ${e.response?.statusCode} ${e.message}');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  Future<void> fetchComments(String postId, int page) async {
-    try {
-      final response = await dio
-          .get('http://10.0.2.2:8888/api/v1/posts/$postId/comments?page=$page');
+      final response = await dio.get(
+        'http://10.0.2.2:8888/api/v1/posts/$postId/comments?page=$page&limit=10',
+      );
       final jsonData = response.data['comments'];
+      final totalPages = response.data['totalPages'];
 
-      comments = List<Comment>.from(
-          jsonData?.map((data) => Comment.fromJson(data)) ?? []);
+      final List<Comment> newComments = List<Comment>.from(
+        jsonData.map((json) {
+          var comment = Comment.fromJson(json);
+          comment.page = page;
+          return comment;
+        }),
+      );
 
+      //记录临界值
+      if (page > loadingEndPage) {
+        comments = comments + newComments;
+        setloadingEndPage(page);
+      } else {
+        comments = newComments + comments;
+        setloadingTopPage(page);
+      }
+
+      setTotalPages(totalPages);
       notifyListeners();
-    } on DioError catch (e) {
-      print('Dio error: ${e.response?.statusCode} ${e.message}');
-    }
-  }
-
-  Future<void> createPost(String title, String content) async {
-    setLoading(true);
-    try {
-      String? token = await storage.read(key: 'auth_token');
-      if (token != null) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
-      }
-      final response = await dio.post('http://10.0.2.2:8888/api/v1/posts',
-          data: {'title': title, 'content': content});
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setLoading(false);
-        setCurrentPage(1);
-        _posts = [];
-        await fetchPosts();
-      }
     } on DioError catch (e) {
       print('Dio error: ${e.response?.statusCode} ${e.message}');
     } finally {
@@ -169,9 +150,10 @@ class PostsModel extends ChangeNotifier {
         'content': content,
         'parentCommentId': parentCommentId,
       });
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         setLoading(false);
-        fetchComments(postId, 2);
+        fetchComments(postId, 1);
       }
     } on DioError catch (e) {
       print('Dio error: ${e.response?.statusCode} ${e.message}');

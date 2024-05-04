@@ -1,8 +1,13 @@
+// ignore_for_file: prefer_const_constructors
+
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:forum_app/components/comment_section.dart';
 import 'package:forum_app/components/post_detail.dart';
+import 'package:forum_app/state/comment_model.dart';
 import 'package:provider/provider.dart';
-import '../state/post.dart';
+import '../state/post_model.dart';
 
 class PostPage extends StatefulWidget {
   final String postId;
@@ -15,17 +20,25 @@ class PostPage extends StatefulWidget {
 
 class _PostPageState extends State<PostPage> {
   final ScrollController _scrollController = ScrollController();
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => _fetchData());
+    _fetchData();
   }
 
-  void _fetchData() {
+  Future<void> _fetchData() async {
     final postsModel = Provider.of<PostsModel>(context, listen: false);
-    postsModel.fetchPostDetail(widget.postId);
-    postsModel.fetchComments(widget.postId, 1);
+    final commentsModel = Provider.of<CommentsModel>(context, listen: false);
+    commentsModel.resetComments();
+    await postsModel.fetchPostDetail(widget.postId);
+    await commentsModel.fetchComments(widget.postId, 2);
+    commentsModel.setloadingEndPage(2);
+    commentsModel.setloadingTopPage(2);
+    setState(() {
+      _loading = false;
+    });
   }
 
   void _scrollToComments() {
@@ -72,11 +85,11 @@ class _PostPageState extends State<PostPage> {
             TextButton(
               onPressed: () {
                 final commentContent = commentController.text;
-                final postsModel =
-                    Provider.of<PostsModel>(context, listen: false);
+                final commentsModel =
+                    Provider.of<CommentsModel>(context, listen: false);
 
                 if (commentContent.isNotEmpty) {
-                  postsModel.createComment(widget.postId, commentContent);
+                  commentsModel.createComment(widget.postId, commentContent);
                   Navigator.pop(context);
                 }
               },
@@ -90,6 +103,10 @@ class _PostPageState extends State<PostPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading == true) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Post Details'),

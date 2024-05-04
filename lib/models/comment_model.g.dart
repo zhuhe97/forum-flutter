@@ -19,6 +19,7 @@ Comment _$CommentFromJson(Map<String, dynamic> json) => Comment(
           ParentComment.fromJson(json['parentComment'] as Map<String, dynamic>),
       parentCommentStatus: $enumDecode(
           _$ParentCommentStatusEnumMap, json['parentCommentStatus']),
+      page: json['page'] as int? ?? 0,
     );
 
 Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
@@ -33,6 +34,7 @@ Map<String, dynamic> _$CommentToJson(Comment instance) => <String, dynamic>{
       'parentComment': instance.parentComment,
       'parentCommentStatus':
           _$ParentCommentStatusEnumMap[instance.parentCommentStatus]!,
+      'page': instance.page,
     };
 
 const _$ParentCommentStatusEnumMap = {

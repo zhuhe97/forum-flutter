@@ -19,6 +19,7 @@ class Comment {
   bool isLikedByCurrentUser;
   final ParentComment parentComment;
   final ParentCommentStatus parentCommentStatus;
+  int page;
   Comment({
     required this.id,
     required this.content,
@@ -30,6 +31,7 @@ class Comment {
     required this.isLikedByCurrentUser,
     required this.parentComment,
     required this.parentCommentStatus,
+    this.page = 0,
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) =>

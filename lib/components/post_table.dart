@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:forum_app/models/post_model.dart';
-import 'package:forum_app/state/post.dart';
+import 'package:forum_app/state/post_model.dart';
 import "package:provider/provider.dart";
 import 'post_page.dart';
 
@@ -24,9 +24,9 @@ class PostsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     final postsModel = Provider.of<PostsModel>(context);
 
-    if (postsModel.loading) {
-      return Center(child: CircularProgressIndicator());
-    }
+    // if (postsModel.loading) {
+    //   return Center(child: CircularProgressIndicator());
+    // }
 
     return ListView.separated(
         separatorBuilder: (BuildContext context, int index) => const Divider(),

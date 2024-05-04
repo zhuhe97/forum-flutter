@@ -3,7 +3,7 @@ import 'package:forum_app/components/auth_check.dart';
 import 'package:forum_app/state/user_model.dart';
 import 'package:forum_app/routes/create_post.dart';
 import 'package:forum_app/routes/user.dart';
-import 'package:forum_app/state/post.dart';
+import 'package:forum_app/state/post_model.dart';
 import 'components/post_table.dart';
 import "package:provider/provider.dart";
 

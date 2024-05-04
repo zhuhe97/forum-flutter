@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:forum_app/routes/login.dart';
 import 'package:forum_app/routes/user.dart';
+import 'package:forum_app/state/comment_model.dart';
 import 'package:forum_app/state/user_model.dart';
 import 'home_page.dart';
 import 'package:provider/provider.dart';
-import 'package:forum_app/state/post.dart';
+import 'package:forum_app/state/post_model.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PostsModel()),
+        ChangeNotifierProvider(create: (_) => CommentsModel()),
       ],
       child: MaterialApp(
         localizationsDelegates: const [
