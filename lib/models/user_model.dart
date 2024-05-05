@@ -4,6 +4,7 @@ part 'user_model.g.dart';
 @JsonSerializable()
 class User {
   final String? username;
+  @JsonKey(name: 'avatar')
   final String? avatarUrl;
   @JsonKey(name: '_id')
   final String? id;
@@ -15,7 +16,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     final name = json['username'] ?? json['name'];
-    final avatarUrl = json['avatarUrl'];
+    final avatarUrl = json['avatar'];
 
     return User(
       id: json['_id'],
