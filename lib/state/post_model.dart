@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:forum_app/models/comment_model.dart';
 import 'package:forum_app/models/post_model.dart';
+import 'package:forum_app/service/services.dart';
 
 class PostsModel extends ChangeNotifier {
   List<Post> _posts = [];
@@ -40,8 +41,13 @@ class PostsModel extends ChangeNotifier {
     // setLoading(true);
 
     try {
-      final response = await dio
-          .get('http://10.0.2.2:8888/api/v1/posts?page=$_currentPage&limit=10');
+      Map<String, dynamic> queryParams = {
+        'page': _currentPage.toString(),
+        'limit': 10.toString(),
+      };
+      final response =
+          await Services.asyncRequest('GET', '/posts', params: queryParams);
+
       final jsonData = response.data['data']['data'];
       List<Post> newPosts =
           List<Post>.from(jsonData.map((json) => Post.fromJson(json)));
@@ -61,8 +67,8 @@ class PostsModel extends ChangeNotifier {
   Future<void> fetchPostDetail(String postId) async {
     // setLoading(true);
     try {
-      final response =
-          await dio.get('http://10.0.2.2:8888/api/v1/posts/$postId');
+      final response = await Services.asyncRequest('GET', '/posts/$postId');
+
       if (response.statusCode == 200) {
         currentPost = Post.fromJson(response.data);
         notifyListeners();
@@ -77,12 +83,9 @@ class PostsModel extends ChangeNotifier {
   Future<void> createPost(String title, String content) async {
     // setLoading(true);
     try {
-      String? token = await storage.read(key: 'auth_token');
-      if (token != null) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
-      }
-      final response = await dio.post('http://10.0.2.2:8888/api/v1/posts',
-          data: {'title': title, 'content': content});
+      final response = await Services.asyncRequest('POST', '/posts',
+          payload: {'title': title, 'content': content});
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         // setLoading(false);
         setCurrentPage(1);

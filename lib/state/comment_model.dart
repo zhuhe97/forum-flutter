@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:forum_app/models/comment_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:forum_app/service/services.dart';
 
 class CommentsModel extends ChangeNotifier {
   List<Comment> comments = [];
@@ -60,8 +61,14 @@ class CommentsModel extends ChangeNotifier {
     setLoading(true);
 
     try {
-      final response = await dio.get(
-        'http://10.0.2.2:8888/api/v1/posts/$postId/comments?page=$page&limit=10',
+      Map<String, dynamic> queryParams = {
+        'page': page.toString(),
+        'limit': 10.toString(),
+      };
+      final response = await Services.asyncRequest(
+        'GET',
+        '/posts/$postId/comments',
+        params: queryParams,
       );
       final jsonData = response.data['comments'];
       final totalPages = response.data['totalPages'];
@@ -94,12 +101,8 @@ class CommentsModel extends ChangeNotifier {
 
   Future<void> toggleLike(String commentId) async {
     try {
-      String? token = await storage.read(key: 'auth_token');
-      if (token != null) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
-      }
       final response =
-          await dio.post('http://10.0.2.2:8888/api/v1/toggleLike/$commentId');
+          await Services.asyncRequest('POST', '/toggleLike/$commentId');
       if (response.statusCode == 200) {
         print('${response.data}');
         final index = comments.indexWhere((comment) => comment.id == commentId);
@@ -118,14 +121,11 @@ class CommentsModel extends ChangeNotifier {
   Future<void> createComment(String postId, String content) async {
     setLoading(true);
     try {
-      String? token = await storage.read(key: 'auth_token');
-      if (token != null) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
-      }
-      final response = await dio
-          .post('http://10.0.2.2:8888/api/v1/posts/$postId/comments', data: {
-        'content': content,
-      });
+      final response = await Services.asyncRequest(
+          'POST', '/posts/$postId/comments',
+          payload: {
+            'content': content,
+          });
       if (response.statusCode == 200 || response.statusCode == 201) {
         setLoading(false);
         fetchComments(postId, 1);
@@ -141,15 +141,12 @@ class CommentsModel extends ChangeNotifier {
       String postId, String parentCommentId, String content) async {
     setLoading(true);
     try {
-      String? token = await storage.read(key: 'auth_token');
-      if (token != null) {
-        dio.options.headers['Authorization'] = 'Bearer $token';
-      }
-      final response = await dio
-          .post('http://10.0.2.2:8888/api/v1/posts/$postId/comments', data: {
-        'content': content,
-        'parentCommentId': parentCommentId,
-      });
+      final response = await Services.asyncRequest(
+          'POST', '/posts/$postId/comments',
+          payload: {
+            'content': content,
+            'parentCommentId': parentCommentId,
+          });
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         setLoading(false);

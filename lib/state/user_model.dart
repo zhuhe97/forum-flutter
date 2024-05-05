@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
 
+import 'package:forum_app/service/services.dart';
+
 class UserModel extends ChangeNotifier {
   final FlutterSecureStorage _storage = FlutterSecureStorage();
   final Dio _dio = Dio();
@@ -20,13 +22,11 @@ class UserModel extends ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     try {
-      final response = await _dio.post(
-        'http://10.0.2.2:8888/api/v1/users/login',
-        data: {
-          'email': email,
-          'password': password,
-        },
-      );
+      final response =
+          await Services.asyncRequest('POST', '/users/login', payload: {
+        'email': email,
+        'password': password,
+      });
 
       if (response.statusCode == 200) {
         await _storage.write(key: 'auth_token', value: response.data['token']);

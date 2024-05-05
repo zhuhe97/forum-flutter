@@ -30,6 +30,7 @@ dependencies:
   json_annotation: ^4.8.1
   flutter_secure_storage: ^4.2.1
   visibility_detector: ^0.2.2
+  fluttertoast: ^8.0.3
 
 dev_dependencies:
   flutter_test:
