@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forum_app/models/comment_model.dart';
+import 'package:forum_app/routes/member_profile.dart';
 import 'package:forum_app/state/comment_model.dart';
 import 'package:intl/intl.dart';
 
@@ -25,21 +26,28 @@ class CommentItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(children: [
-                CircleAvatar(
-                  backgroundImage: comment.author.avatarUrl != null
-                      ? NetworkImage(comment.author.avatarUrl!)
-                      : AssetImage('lib/assets/defaultAvatar.png')
-                          as ImageProvider,
-                  onBackgroundImageError: (_, __) => Icon(Icons.person),
-                  radius: 12,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  comment.author.username!,
-                  style: TextStyle(color: Colors.black, fontSize: 14),
-                ),
-              ]),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/member_profile', arguments: {
+                    'userId': comment.author.id,
+                  });
+                },
+                child: Row(children: [
+                  CircleAvatar(
+                    backgroundImage: comment.author.avatarUrl != null
+                        ? NetworkImage(comment.author.avatarUrl!)
+                        : AssetImage('lib/assets/defaultAvatar.png')
+                            as ImageProvider,
+                    onBackgroundImageError: (_, __) => Icon(Icons.person),
+                    radius: 12,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    comment.author.username!,
+                    style: TextStyle(color: Colors.black, fontSize: 14),
+                  ),
+                ]),
+              ),
               Row(
                 children: [
                   Text(

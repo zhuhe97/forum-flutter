@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forum_app/routes/login.dart';
+import 'package:forum_app/routes/member_profile.dart';
 import 'package:forum_app/routes/user.dart';
 import 'package:forum_app/state/comment_model.dart';
 import 'package:forum_app/state/user_model.dart';
@@ -46,6 +47,11 @@ class MyApp extends StatelessWidget {
               create: (_) => UserModel(), child: LoginPage()),
           '/user': (context) => ChangeNotifierProvider(
               create: (_) => UserModel(), child: UserProfilePage()),
+          '/member_profile': (context) {
+            final routeArgs = ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>;
+            return MemberProfile(userId: routeArgs['userId']);
+          },
         },
       ),
     );
