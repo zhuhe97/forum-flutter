@@ -8,7 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class CustomInterceptor extends Interceptor {
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   @override
   Future<void> onRequest(
@@ -41,17 +41,29 @@ class CustomInterceptor extends Interceptor {
 }
 
 class Services {
-  static final Dio _dio = Dio(BaseOptions(
-    baseUrl: "http://10.0.2.2:8888/api/v1",
-    connectTimeout: 5000,
-    receiveTimeout: 3000,
-  ));
+  static final Dio _dio = _createDio();
 
-  Services() {
-    _dio.interceptors.add(CustomInterceptor());
-    _dio.interceptors
-        .add(LogInterceptor(responseBody: true, requestBody: true));
+  static Dio _createDio() {
+    final dio = Dio(BaseOptions(
+      baseUrl: "http://10.0.2.2:8888/api/v1",
+      connectTimeout: 5000,
+      receiveTimeout: 3000,
+    ));
+
+    if (dio.interceptors.isEmpty) {
+      dio.interceptors.add(CustomInterceptor());
+      dio.interceptors
+          .add(LogInterceptor(responseBody: true, requestBody: true));
+    }
+
+    return dio;
   }
+
+  // Services() {
+  //   _dio.interceptors.add(CustomInterceptor());
+  //   _dio.interceptors
+  //       .add(LogInterceptor(responseBody: true, requestBody: true));
+  // }
 
   static dynamic asyncRequest(String method, String url,
       {dynamic payload, Map<String, dynamic>? params, String? otp}) async {
